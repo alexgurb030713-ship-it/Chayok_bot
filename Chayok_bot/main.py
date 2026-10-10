@@ -13,30 +13,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ClickData(BaseModel):
-    user_id: int
-    clicks: int = 1
-
-class UserData(BaseModel):
-    user_id: int
-
 @app.on_event("startup")
 async def startup():
     await database.init_db()
 
-@app.get("/api/profile/{user_id}")
-async def get_profile(user_id: int):
-    return await database.get_or_create_user(user_id)
+class UserData(BaseModel):
+    user_id: int
 
-@app.post("/api/click")
-async def click(data: ClickData):
-    return await database.process_click_db(data.user_id, data.clicks)
+@app.post("/get_user")
+async def get_user_data(data: UserData):
+    return await database.get_user(data.user_id)
 
-@app.post("/api/spin")
-async def spin(data: UserData):
-    return await database.spin_roulette_db(data.user_id)
-from fastapi.responses import FileResponse
+@app.post("/click")
+async def click(data: UserData):
+    return await database.add_click(data.user_id)
 
-@app.get("/")
-async def serve_index():
-    return FileResponse("index.html")
+@app.get("/top")
+async def get_top():
+    return await database.get_top_players()
