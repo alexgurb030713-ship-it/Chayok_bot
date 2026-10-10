@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import database
+import os
 
 app = FastAPI()
 
@@ -19,6 +21,13 @@ async def startup():
 
 class UserData(BaseModel):
     user_id: int
+
+@app.get("/", response_class=HTMLResponse)
+async def read_index():
+    if os.path.exists("index.html"):
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>Файл index.html не найден</h1>"
 
 @app.post("/get_user")
 async def get_user_data(data: UserData):
